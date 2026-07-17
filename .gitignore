@@ -1,0 +1,5 @@
+.env
+*.token
+__pycache__/
+*.pyc
+data/raw/
