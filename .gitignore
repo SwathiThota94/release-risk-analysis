@@ -1,6 +1,6 @@
 .env
-*.token
-__pycache__/
-*.pyc
-data/raw/
-data/tables/
+   *.token
+   __pycache__/
+   *.pyc
+   data/raw/
+   data/tables/
