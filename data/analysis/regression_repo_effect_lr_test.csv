@@ -1,0 +1,2 @@
+log_likelihood_full_model,log_likelihood_reduced_model_no_repo_terms,lr_statistic,degrees_of_freedom,p_value,repository_effects_significant_0.05
+-109.47312360899045,-119.10147485134047,19.256702484700043,2,6.583550718201806e-05,True

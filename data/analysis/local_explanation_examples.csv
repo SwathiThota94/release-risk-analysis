@@ -1,0 +1,58 @@
+example,release_id,repository_name,predicted_probability,feature,shap_value
+Highest predicted risk,331316417,apache/airflow,0.5490680337168176,repo_kubernetes/kubernetes,-0.0001751038058631958
+Highest predicted risk,331316417,apache/airflow,0.5490680337168176,repo_microsoft/vscode,0.00018235048415890032
+Highest predicted risk,331316417,apache/airflow,0.5490680337168176,top_contributor_share,0.001957111218885543
+Highest predicted risk,331316417,apache/airflow,0.5490680337168176,has_prior_release,-0.002298540005063637
+Highest predicted risk,331316417,apache/airflow,0.5490680337168176,median_time_to_merge_hours,0.0023286615066356983
+Highest predicted risk,331316417,apache/airflow,0.5490680337168176,pct_merged,0.003286333407375951
+Highest predicted risk,331316417,apache/airflow,0.5490680337168176,had_commit_activity,-0.0038359996610208376
+Highest predicted risk,331316417,apache/airflow,0.5490680337168176,avg_time_to_merge_hours,0.004374601296105904
+Highest predicted risk,331316417,apache/airflow,0.5490680337168176,cycle_length_days,0.007489385783143089
+Highest predicted risk,331316417,apache/airflow,0.5490680337168176,has_prior_release_history,-0.008894752460668733
+Highest predicted risk,331316417,apache/airflow,0.5490680337168176,had_pr_activity,-0.009771793854520868
+Highest predicted risk,331316417,apache/airflow,0.5490680337168176,release_sequence,-0.015256759035339617
+Highest predicted risk,331316417,apache/airflow,0.5490680337168176,distinct_contributors,0.02105291448175781
+Highest predicted risk,331316417,apache/airflow,0.5490680337168176,pr_count,0.021296644041651967
+Highest predicted risk,331316417,apache/airflow,0.5490680337168176,prior_releases_avg_bugs_repo_z,0.023059344702801136
+Highest predicted risk,331316417,apache/airflow,0.5490680337168176,commit_count,0.031007701244459288
+Highest predicted risk,331316417,apache/airflow,0.5490680337168176,first_time_contributor_share,0.03783684345198267
+Highest predicted risk,331316417,apache/airflow,0.5490680337168176,open_bugs_at_release_repo_z,0.04814521681577621
+Highest predicted risk,331316417,apache/airflow,0.5490680337168176,first_time_contributor_count,0.09731563765581973
+Lowest predicted risk,321280531,kubernetes/kubernetes,0.3353321672370495,repo_kubernetes/kubernetes,0.00017405528007958385
+Lowest predicted risk,321280531,kubernetes/kubernetes,0.3353321672370495,repo_microsoft/vscode,0.00018235048415890032
+Lowest predicted risk,321280531,kubernetes/kubernetes,0.3353321672370495,median_time_to_merge_hours,-0.0006457630341983923
+Lowest predicted risk,321280531,kubernetes/kubernetes,0.3353321672370495,has_prior_release,-0.002298540005063637
+Lowest predicted risk,321280531,kubernetes/kubernetes,0.3353321672370495,pr_count,-0.0030849437123874075
+Lowest predicted risk,321280531,kubernetes/kubernetes,0.3353321672370495,avg_time_to_merge_hours,0.003175107287297903
+Lowest predicted risk,321280531,kubernetes/kubernetes,0.3353321672370495,cycle_length_days,-0.0035261573234253774
+Lowest predicted risk,321280531,kubernetes/kubernetes,0.3353321672370495,had_commit_activity,-0.0038359996610208376
+Lowest predicted risk,321280531,kubernetes/kubernetes,0.3353321672370495,top_contributor_share,-0.003955363004284222
+Lowest predicted risk,321280531,kubernetes/kubernetes,0.3353321672370495,distinct_contributors,-0.0053742096456554575
+Lowest predicted risk,321280531,kubernetes/kubernetes,0.3353321672370495,has_prior_release_history,-0.008894752460668733
+Lowest predicted risk,321280531,kubernetes/kubernetes,0.3353321672370495,had_pr_activity,-0.009771793854520868
+Lowest predicted risk,321280531,kubernetes/kubernetes,0.3353321672370495,commit_count,-0.011813067666857439
+Lowest predicted risk,321280531,kubernetes/kubernetes,0.3353321672370495,pct_merged,-0.012676636743478447
+Lowest predicted risk,321280531,kubernetes/kubernetes,0.3353321672370495,first_time_contributor_count,-0.014345471240641647
+Lowest predicted risk,321280531,kubernetes/kubernetes,0.3353321672370495,first_time_contributor_share,-0.026268716464038378
+Lowest predicted risk,321280531,kubernetes/kubernetes,0.3353321672370495,open_bugs_at_release_repo_z,-0.0341069999627863
+Lowest predicted risk,321280531,kubernetes/kubernetes,0.3353321672370495,prior_releases_avg_bugs_repo_z,-0.1622703604731165
+Lowest predicted risk,321280531,kubernetes/kubernetes,0.3353321672370495,release_sequence,-0.3226346517328342
+Closest to decision threshold (0.32),321280531,kubernetes/kubernetes,0.3353321672370495,repo_kubernetes/kubernetes,0.00017405528007958385
+Closest to decision threshold (0.32),321280531,kubernetes/kubernetes,0.3353321672370495,repo_microsoft/vscode,0.00018235048415890032
+Closest to decision threshold (0.32),321280531,kubernetes/kubernetes,0.3353321672370495,median_time_to_merge_hours,-0.0006457630341983923
+Closest to decision threshold (0.32),321280531,kubernetes/kubernetes,0.3353321672370495,has_prior_release,-0.002298540005063637
+Closest to decision threshold (0.32),321280531,kubernetes/kubernetes,0.3353321672370495,pr_count,-0.0030849437123874075
+Closest to decision threshold (0.32),321280531,kubernetes/kubernetes,0.3353321672370495,avg_time_to_merge_hours,0.003175107287297903
+Closest to decision threshold (0.32),321280531,kubernetes/kubernetes,0.3353321672370495,cycle_length_days,-0.0035261573234253774
+Closest to decision threshold (0.32),321280531,kubernetes/kubernetes,0.3353321672370495,had_commit_activity,-0.0038359996610208376
+Closest to decision threshold (0.32),321280531,kubernetes/kubernetes,0.3353321672370495,top_contributor_share,-0.003955363004284222
+Closest to decision threshold (0.32),321280531,kubernetes/kubernetes,0.3353321672370495,distinct_contributors,-0.0053742096456554575
+Closest to decision threshold (0.32),321280531,kubernetes/kubernetes,0.3353321672370495,has_prior_release_history,-0.008894752460668733
+Closest to decision threshold (0.32),321280531,kubernetes/kubernetes,0.3353321672370495,had_pr_activity,-0.009771793854520868
+Closest to decision threshold (0.32),321280531,kubernetes/kubernetes,0.3353321672370495,commit_count,-0.011813067666857439
+Closest to decision threshold (0.32),321280531,kubernetes/kubernetes,0.3353321672370495,pct_merged,-0.012676636743478447
+Closest to decision threshold (0.32),321280531,kubernetes/kubernetes,0.3353321672370495,first_time_contributor_count,-0.014345471240641647
+Closest to decision threshold (0.32),321280531,kubernetes/kubernetes,0.3353321672370495,first_time_contributor_share,-0.026268716464038378
+Closest to decision threshold (0.32),321280531,kubernetes/kubernetes,0.3353321672370495,open_bugs_at_release_repo_z,-0.0341069999627863
+Closest to decision threshold (0.32),321280531,kubernetes/kubernetes,0.3353321672370495,prior_releases_avg_bugs_repo_z,-0.1622703604731165
+Closest to decision threshold (0.32),321280531,kubernetes/kubernetes,0.3353321672370495,release_sequence,-0.3226346517328342

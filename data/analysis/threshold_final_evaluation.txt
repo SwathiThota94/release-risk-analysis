@@ -1,0 +1,23 @@
+THRESHOLD SELECTION AND FINAL TEST-SET CONFIRMATION
+=======================================================
+Model: logistic_regression
+Threshold selected on VALIDATION set (max F2, recall weighted 2x precision): 0.43
+Rationale: this is a pre-deployment risk check where missing a genuinely risky release
+is treated as more costly than an extra false alarm, so F2 (not F1) was used to select
+the operating threshold.
+
+Validation set at chosen threshold: precision=0.368, recall=1.000, F1=0.538, F2=0.745
+
+TEST SET (evaluated once, using the validation-selected threshold -- not tuned on test):
+  At threshold 0.43: precision=0.944, recall=1.000, F1=0.971, F2=0.988, accuracy=0.964
+  At default 0.50:      precision=0.917, recall=0.485, F1=0.635, F2=0.536, accuracy=0.658
+
+Confusion matrix on test set at threshold 0.43 ([[TN, FP], [FN, TP]]):
+  [[39, 4], [0, 68]]
+
+Interpretation note: precision/recall/F1/F2 at any single threshold should be read alongside
+the documented test-set base-rate drift (test positive rate differs substantially from
+training) -- these figures describe performance at ONE specific operating point chosen from
+validation data, not the model's overall discrimination ability (see ROC-AUC/PR-AUC for that).
+See threshold_candidates_sensitivity.csv for the full tradeoff across several candidate
+thresholds, so this choice can be reviewed rather than taken on faith.
