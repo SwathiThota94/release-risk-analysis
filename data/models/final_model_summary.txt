@@ -1,0 +1,57 @@
+FINAL MODEL SELECTION SUMMARY
+============================================================
+Selected model: logistic_regression
+Chosen operating threshold: 0.43
+
+SELECTION RATIONALE:
+1. Tree-based models (decision tree, random forest, gradient boosting) achieved strong
+   validation ROC-AUC but collapsed on the test set (as low as 0.237-0.30, worse than or
+   near random), due to covariate shift in several key features. This ruled out the entire
+   tree-based family.
+2. A severe multicollinearity issue was found and fixed (see preprocess_for_modeling.py):
+   open_bugs_at_release and prior_releases_avg_bugs were confounded with repository identity
+   (VS Code's absolute backlog scale is thousands of issues larger than the other two repos).
+   Fixing this via repository-wise normalization substantially improved every linear model's
+   test ROC-AUC and calibration -- plain logistic regression's test ROC-AUC rose from 0.912 to
+   0.929 and its Brier score improved from 0.257 to 0.213, purely from this fix.
+3. Before the multicollinearity fix, recency-weighted logistic regression was selected over
+   Elastic Net via a calibration tiebreaker (both were statistically tied on ROC-AUC). AFTER
+   the fix, a fresh bootstrap comparison found all three linear models (plain logistic
+   regression, recency-weighted, Elastic Net) statistically indistinguishable on ROC-AUC, and
+   plain logistic regression now has the BEST calibration of the three (Brier 0.213 vs. 0.258
+   for Elastic Net and 0.293 for recency-weighted).
+4. Given that three-way tie, plain logistic regression is selected as the simplest model.
+   Recency-weighting's original motivation remains valid -- a year-over-year trend test,
+   re-run and unchanged after the multicollinearity fix, still confirms a real, significant
+   drift in bug-reporting rates over the training window (e.g. kubernetes/kubernetes rho=-0.79,
+   p=2.3e-37) -- but that fix no longer demonstrably improves on the plain model now that the
+   separate multicollinearity problem is resolved, so its added complexity is not earning its
+   place. The drift remains a documented limitation of the target variable (see the
+   Target-Variable Definition document), independent of which model is selected.
+
+TEST-SET EVALUATION (point estimates):
+  n = 111, positive rate = 0.613
+  ROC-AUC  = 0.9285
+  PR-AUC   = 0.8862
+  Brier    = 0.2132
+
+BOOTSTRAP 95% CONFIDENCE INTERVALS (2000 resamples, test set):
+  logistic_regression          ROC-AUC = 0.9285 (95% CI: 0.8492 - 0.9885)
+  recency_weighted_logistic    ROC-AUC = 0.9196 (95% CI: 0.8311 - 0.9858)
+  elastic_net                  ROC-AUC = 0.9330 (95% CI: 0.8568 - 0.9903)
+
+PAIRWISE STATISTICAL COMPARISON:
+  logistic_regression vs recency_weighted_logistic: diff=+0.0089 (95% CI: -0.0016 to +0.0287) -- not statistically distinguishable
+  logistic_regression vs elastic_net: diff=-0.0045 (95% CI: -0.0127 to +0.0003) -- not statistically distinguishable
+  recency_weighted_logistic vs elastic_net: diff=-0.0134 (95% CI: -0.0356 to +0.0000) -- not statistically distinguishable
+
+OPERATING POINT (threshold=0.43) WITH BOOTSTRAP 95% CIs:
+  precision  = 0.944  (95% CI: 0.887 - 0.987)
+  recall     = 1.000  (95% CI: 1.000 - 1.000)
+  f1         = 0.971  (95% CI: 0.940 - 0.993)
+
+NOTE ON ACCURACY: accuracy is deliberately NOT used as a primary metric in this project,
+since the target variable's positive rate differs substantially between training (~24%) and
+the test period (documented, investigated base-rate drift -- see the Target-Variable
+Definition document). ROC-AUC, PR-AUC, and threshold-specific precision/recall/F1 are the
+primary evaluation criteria.

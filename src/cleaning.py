@@ -48,11 +48,13 @@ import numpy as np
 BUG_LABELS = {
     "kubernetes/kubernetes": {"kind/bug", "kind/regression"},
     "apache/airflow": {"kind:bug", "type:bug-fix"},
+    "microsoft/vscode": {"bug"},
 }
 
 FEATURE_LABELS = {
     "kubernetes/kubernetes": {"kind/feature"},
     "apache/airflow": {"kind:feature"},
+    "microsoft/vscode": {"feature-request"},
 }
 
 SECURITY_LABELS = {
@@ -68,6 +70,7 @@ DOCS_LABELS = {
 SUPPORT_LABELS = {
     "kubernetes/kubernetes": {"kind/support"},
     "apache/airflow": {"kind:support"},
+    "microsoft/vscode": {"*question"},
 }
 
 # Known bot / automated account patterns. Matched case-insensitively against

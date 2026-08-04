@@ -1,0 +1,4 @@
+model_a,model_b,mean_auc_diff_a_minus_b,ci_low_95,ci_high_95,pct_iterations_a_better,difference_likely_real
+logistic_regression,recency_weighted_logistic,0.008911742675151203,-0.0016396966345735564,0.02872882195513852,85.0,False
+logistic_regression,elastic_net,-0.004481323900386068,-0.012676056338028152,0.0003450655624568394,3.6999999999999997,False
+recency_weighted_logistic,elastic_net,-0.013393066575537271,-0.035619189406502924,0.0,0.8999999999999999,False

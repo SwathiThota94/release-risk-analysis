@@ -30,6 +30,7 @@ from cleaning import (
 REPOS = {
     "kubernetes_kubernetes": "kubernetes/kubernetes",
     "apache_airflow": "apache/airflow",
+    "microsoft_vscode": "microsoft/vscode",
 }
 
 # This file lives in src/, but data/ sits at the repo root alongside main.py.
@@ -68,6 +69,15 @@ def run_for_repo(folder_name: str, repo: str, quality_stats: list):
     quality_stats.append((f"{folder_name}: releases", releases_clean.attrs["cleaning_stats"]))
     print("Releases cleaned:", releases_clean.attrs["cleaning_stats"])
 
+    # NOTE: min_cycle_days is intentionally NOT applied here by default.
+    # Short cycles (near-simultaneous multi-branch releases) are kept in the
+    # primary dataset because RQ4 directly tests whether shorter release
+    # cycles predict elevated risk -- excluding them would remove the exact
+    # observations needed to test that hypothesis. cycle_length_days is
+    # retained as a feature so the model can use it directly. If your team
+    # wants a short-cycle-excluded sensitivity check, call
+    # build_release_cycles(releases_clean, min_cycle_days=1.0) separately
+    # and compare results rather than making exclusion the default.
     cycles = build_release_cycles(releases_clean)
     cycles.to_csv(out_dir / "release_cycles.csv", index=False)
     quality_stats.append((f"{folder_name}: cycles", cycles.attrs["cleaning_stats"]))
