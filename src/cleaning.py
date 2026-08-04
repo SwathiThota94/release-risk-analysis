@@ -21,17 +21,17 @@ Usage:
         build_data_quality_report
 
 Notes on scope:
-    - Repository-normalized handling is repository-aware: Kubernetes and
-      Airflow are treated as the two primary repositories. Label taxonomy
-      mapping is defined per repository since label conventions differ
-      (kind/bug vs kind:bug).
+    - Repository-normalized handling is repository-aware: Kubernetes,
+      Airflow, and VS Code are all treated as primary repositories. Label
+      taxonomy mapping is defined per repository since label conventions
+      differ (kind/bug vs kind:bug vs bug).
     - Commit and pull-request cleaning functions are written against the
-      column names documented in the Week 2 data dictionary
-      (commit_sha/committed_at/author for commits; pr_id/created_at/
-      merged_at/author for pull requests). Confirm these match your actual
-      data/raw/<repo>/commits.json and pull_requests.json field names before
-      running end-to-end -- those two tables have not yet been inspected
-      directly in this project, unlike releases and issues.
+      confirmed columns in data/tables/<repo>/commits_table.csv and
+      pull_requests_table.csv (commit_sha, author identifier, additions,
+      deletions, total changes, etc. for commits; pull_request_id,
+      created_at, merged_at, author identifier, review count, comment
+      count, etc. for pull requests) -- see clean_commits() and
+      clean_pull_requests() below for the full confirmed schema.
 """
 
 import re
@@ -60,11 +60,13 @@ FEATURE_LABELS = {
 SECURITY_LABELS = {
     "kubernetes/kubernetes": {"area/security"},
     "apache/airflow": {"area:security", "kind:security"},
+    "microsoft/vscode": {"security"},
 }
 
 DOCS_LABELS = {
     "kubernetes/kubernetes": {"area/documentation", "kind/documentation"},
     "apache/airflow": {"kind:documentation"},
+    "microsoft/vscode": {"documentation"},
 }
 
 SUPPORT_LABELS = {
