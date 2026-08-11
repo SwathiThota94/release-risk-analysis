@@ -42,7 +42,7 @@ import joblib
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.utils.class_weight import compute_sample_weight
-from sklearn.metrics import roc_auc_score, average_precision_score, brier_score_loss, accuracy_score
+from sklearn.metrics import roc_auc_score, average_precision_score, brier_score_loss, accuracy_score, precision_score, recall_score, f1_score
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 FEATURES_DIR = REPO_ROOT / "data" / "features"
@@ -124,12 +124,22 @@ def main():
     # --- Decision Tree ---
     print("=== Decision Tree (tuning max_depth, min_samples_leaf on validation set) ===")
     best_dt, best_dt_auc, best_dt_params = None, -np.inf, None
+    grid_rows = []
     for max_depth in [2, 3, 4, 5, 7, None]:
         for min_samples_leaf in [5, 10, 20]:
             m = DecisionTreeClassifier(max_depth=max_depth, min_samples_leaf=min_samples_leaf,
                                         class_weight="balanced", random_state=42)
             m.fit(X_train, y_train)
-            auc = roc_auc_score(y_val, m.predict_proba(X_val)[:, 1])
+            proba_val = m.predict_proba(X_val)[:, 1]
+            preds_val = m.predict(X_val)
+            auc = roc_auc_score(y_val, proba_val)
+            grid_rows.append({"model": "decision_tree", "max_depth": max_depth,
+                               "min_samples_leaf": min_samples_leaf, "n_estimators": None,
+                               "learning_rate": None, "validation_roc_auc": auc,
+                               "validation_precision": precision_score(y_val, preds_val, zero_division=0),
+                               "validation_recall": recall_score(y_val, preds_val, zero_division=0),
+                               "validation_f1": f1_score(y_val, preds_val, zero_division=0),
+                               "validation_accuracy": accuracy_score(y_val, preds_val)})
             if auc > best_dt_auc:
                 best_dt_auc, best_dt, best_dt_params = auc, m, (max_depth, min_samples_leaf)
     print(f"Best params: max_depth={best_dt_params[0]}, min_samples_leaf={best_dt_params[1]} "
@@ -146,7 +156,16 @@ def main():
             m = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth,
                                         class_weight="balanced", random_state=42, n_jobs=-1)
             m.fit(X_train, y_train)
-            auc = roc_auc_score(y_val, m.predict_proba(X_val)[:, 1])
+            proba_val = m.predict_proba(X_val)[:, 1]
+            preds_val = m.predict(X_val)
+            auc = roc_auc_score(y_val, proba_val)
+            grid_rows.append({"model": "random_forest", "max_depth": max_depth,
+                               "min_samples_leaf": None, "n_estimators": n_estimators,
+                               "learning_rate": None, "validation_roc_auc": auc,
+                               "validation_precision": precision_score(y_val, preds_val, zero_division=0),
+                               "validation_recall": recall_score(y_val, preds_val, zero_division=0),
+                               "validation_f1": f1_score(y_val, preds_val, zero_division=0),
+                               "validation_accuracy": accuracy_score(y_val, preds_val)})
             if auc > best_rf_auc:
                 best_rf_auc, best_rf, best_rf_params = auc, m, (n_estimators, max_depth)
     print(f"Best params: n_estimators={best_rf_params[0]}, max_depth={best_rf_params[1]} "
@@ -165,7 +184,16 @@ def main():
                 m = GradientBoostingClassifier(n_estimators=n_estimators, max_depth=max_depth,
                                                 learning_rate=learning_rate, random_state=42)
                 m.fit(X_train, y_train, sample_weight=sample_weight_train)
-                auc = roc_auc_score(y_val, m.predict_proba(X_val)[:, 1])
+                proba_val = m.predict_proba(X_val)[:, 1]
+                preds_val = m.predict(X_val)
+                auc = roc_auc_score(y_val, proba_val)
+                grid_rows.append({"model": "gradient_boosting", "max_depth": max_depth,
+                                   "min_samples_leaf": None, "n_estimators": n_estimators,
+                                   "learning_rate": learning_rate, "validation_roc_auc": auc,
+                                   "validation_precision": precision_score(y_val, preds_val, zero_division=0),
+                                   "validation_recall": recall_score(y_val, preds_val, zero_division=0),
+                                   "validation_f1": f1_score(y_val, preds_val, zero_division=0),
+                                   "validation_accuracy": accuracy_score(y_val, preds_val)})
                 if auc > best_gb_auc:
                     best_gb_auc, best_gb, best_gb_params = auc, m, (n_estimators, max_depth, learning_rate)
     print(f"Best params: n_estimators={best_gb_params[0]}, max_depth={best_gb_params[1]}, "
@@ -173,6 +201,11 @@ def main():
     report_and_collect(best_gb, X_train, y_train, X_val, y_val, X_test, y_test, "gradient_boosting", rows)
     print_top_importances(best_gb, "gradient_boosting")
     joblib.dump(best_gb, MODELS_DIR / "gradient_boosting_model.joblib")
+
+    # --- Write full hyperparameter grid (all combinations tried, not just winners) ---
+    grid_df = pd.DataFrame(grid_rows)
+    grid_df.to_csv(MODELS_DIR / "tree_hyperparameter_grid.csv", index=False)
+    print(f"\nWrote full hyperparameter grid ({len(grid_df)} combinations) to {MODELS_DIR / 'tree_hyperparameter_grid.csv'}")
 
     # --- Append to the shared model comparison table ---
     new_rows_df = pd.DataFrame(rows)
@@ -188,6 +221,7 @@ def main():
     print(f"Decision Tree:      {best_dt_auc:.4f}")
     print(f"Random Forest:      {best_rf_auc:.4f}")
     print(f"Gradient Boosting:  {best_gb_auc:.4f}")
+
 
 
 if __name__ == "__main__":

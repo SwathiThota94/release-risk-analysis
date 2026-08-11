@@ -58,14 +58,14 @@ FULL_FEATURES = [
     "cycle_length_days", "release_sequence", "commit_count", "pr_count",
     "pct_merged", "avg_time_to_merge_hours", "median_time_to_merge_hours",
     "distinct_contributors", "first_time_contributor_count", "first_time_contributor_share",
-    "top_contributor_share", "open_issues_at_release", "open_bugs_at_release",
-    "prior_releases_avg_bugs", "prior_releases_count",
+    "top_contributor_share", "open_bugs_at_release_repo_z",
+    "prior_releases_avg_bugs_repo_z",
     "had_commit_activity", "had_pr_activity", "has_prior_release_history", "has_prior_release",
     "repo_kubernetes/kubernetes", "repo_microsoft/vscode",
 ]
 
 REPO_COLS = ["repo_kubernetes/kubernetes", "repo_microsoft/vscode"]
-SEQUENCE_COLS = ["release_sequence", "prior_releases_count"]
+SEQUENCE_COLS = ["release_sequence"]
 
 CONFIGURATIONS = {
     "full_feature_set": FULL_FEATURES,

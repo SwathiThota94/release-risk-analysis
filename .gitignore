@@ -4,3 +4,5 @@ __pycache__/
 *.pyc
 data/raw/
 data/tables/
+data/clean/kubernetes_kubernetes/issues_clean.csv
+data/clean/microsoft_vscode/issues_clean.csv

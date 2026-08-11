@@ -1,0 +1,19 @@
+table,repo,rows_in,rows_out,dropped_unparseable_date,dropped_before_since_date,dropped_draft,dropped_prerelease,cycles_built,cycles_missing_start,dropped_short_cycle,dropped_unparseable_created_at,category_breakdown,bot_commit_share,bot_pr_share,bot_contributor_share,missing_first_contribution_date_share
+kubernetes_kubernetes: releases,kubernetes/kubernetes,805.0,365.0,0.0,440.0,0.0,0.0,,,,,,,,,
+kubernetes_kubernetes: cycles,,,,,,,,260.0,1.0,0.0,,,,,,
+kubernetes_kubernetes: issues,kubernetes/kubernetes,49326.0,49326.0,,,,,,,,0.0,"{'Other': 24016, 'Bug': 15617, 'Feature request': 6046, 'Support/question': 2410, 'Documentation': 1010, 'Security': 227}",,,,
+kubernetes_kubernetes: commits,kubernetes/kubernetes,43005.0,43005.0,0.0,,,,,,,,,0.376863155447041,,,
+kubernetes_kubernetes: pull_requests,kubernetes/kubernetes,90616.0,90616.0,0.0,,,,,,,,,,1.103557870574733e-05,,
+kubernetes_kubernetes: contributors,kubernetes/kubernetes,348.0,348.0,,,,,,,,,,,,0.0028735632183908046,1.0
+apache_airflow: releases,apache/airflow,125.0,98.0,0.0,24.0,0.0,3.0,,,,,,,,,
+apache_airflow: cycles,,,,,,,,98.0,1.0,0.0,,,,,,
+apache_airflow: issues,apache/airflow,14838.0,14838.0,,,,,,,,0.0,"{'Bug': 8566, 'Feature request': 3269, 'Other': 2715, 'Documentation': 288}",,,,
+apache_airflow: commits,apache/airflow,28502.0,28502.0,0.0,,,,,,,,,0.01792856641639183,,,
+apache_airflow: pull_requests,apache/airflow,49520.0,49520.0,0.0,,,,,,,,,,0.06205573505654281,,
+apache_airflow: contributors,apache/airflow,413.0,413.0,,,,,,,,,,,,0.004842615012106538,1.0
+microsoft_vscode: releases,microsoft/vscode,228.0,204.0,0.0,24.0,0.0,0.0,,,,,,,,,
+microsoft_vscode: cycles,,,,,,,,204.0,1.0,0.0,,,,,,
+microsoft_vscode: issues,microsoft/vscode,248523.0,248523.0,,,,,,,,0.0,"{'Other': 168167, 'Bug': 45341, 'Feature request': 28279, 'Support/question': 6700, 'Security': 36}",,,,
+microsoft_vscode: commits,microsoft/vscode,86556.0,86556.0,0.0,,,,,,,,,0.004690604926290494,,,
+microsoft_vscode: pull_requests,microsoft/vscode,61769.0,61769.0,0.0,,,,,,,,,,0.007835645712250481,,
+microsoft_vscode: contributors,microsoft/vscode,322.0,322.0,,,,,,,,,,,,0.003105590062111801,1.0

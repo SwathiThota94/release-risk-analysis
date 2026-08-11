@@ -55,7 +55,7 @@ import joblib
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import GaussianNB
-from sklearn.metrics import roc_auc_score, average_precision_score, brier_score_loss, accuracy_score
+from sklearn.metrics import roc_auc_score, average_precision_score, brier_score_loss, accuracy_score, precision_score, recall_score, f1_score
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 FEATURES_DIR = REPO_ROOT / "data" / "features"
@@ -109,6 +109,9 @@ def evaluate(model, X, y, label, split):
         "pr_auc": average_precision_score(y, proba) if len(np.unique(y)) > 1 else np.nan,
         "brier_score": brier_score_loss(y, proba),
         "accuracy": accuracy_score(y, preds),
+        "precision": precision_score(y, preds, zero_division=0),
+        "recall": recall_score(y, preds, zero_division=0),
+        "f1": f1_score(y, preds, zero_division=0),
     }
 
 
@@ -298,6 +301,9 @@ def main():
                 "pr_auc": average_precision_score(y_repo_test, proba),
                 "brier_score": brier_score_loss(y_repo_test, proba),
                 "accuracy": accuracy_score(y_repo_test, preds),
+                "precision": precision_score(y_repo_test, preds, zero_division=0),
+                "recall": recall_score(y_repo_test, preds, zero_division=0),
+                "f1": f1_score(y_repo_test, preds, zero_division=0),
             }
             rows.append(r)
             print(f"    [test] ROC-AUC={r['roc_auc']:.4f}  PR-AUC={r['pr_auc']:.4f}  Accuracy={r['accuracy']:.4f}")
