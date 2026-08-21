@@ -23,6 +23,15 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
+from sklearn.metrics import (
+    roc_auc_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    accuracy_score,
+    confusion_matrix,
+)
+
 from dashboard_core import DashboardData, FEATURE_COLS
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -46,6 +55,29 @@ def render_overview(data: DashboardData):
     col2.metric("Repositories", data.df["repository_name"].nunique())
     col3.metric("Final model", data.model_name)
     col4.metric("Operating threshold", f"{data.threshold:.2f}" if isinstance(data.threshold, float) else data.threshold)
+        # Final model performance on the test set
+    test_df = data.df[data.df["split"] == "test"].copy()
+
+    X_test = data.scaler.transform(test_df[FEATURE_COLS].values)
+    y_test = test_df["elevated_risk"].astype(int).values
+
+    test_prob = data.model.predict_proba(X_test)[:, 1]
+    test_pred = (test_prob >= float(data.threshold)).astype(int)
+
+    roc_auc = roc_auc_score(y_test, test_prob)
+    precision = precision_score(y_test, test_pred, zero_division=0)
+    recall = recall_score(y_test, test_pred, zero_division=0)
+    f1 = f1_score(y_test, test_pred, zero_division=0)
+    accuracy = accuracy_score(y_test, test_pred)
+
+    st.subheader("Final model performance — test set")
+
+    p1, p2, p3, p4, p5 = st.columns(5)
+    p1.metric("ROC-AUC", f"{roc_auc:.3f}")
+    p2.metric("Precision", f"{precision:.1%}")
+    p3.metric("Recall", f"{recall:.1%}")
+    p4.metric("F1 Score", f"{f1:.1%}")
+    p5.metric("Accuracy", f"{accuracy:.1%}")
 
     st.subheader("Repository breakdown")
     repo_counts = data.df["repository_name"].value_counts().rename("releases")
@@ -176,6 +208,38 @@ def render_release_detail(data: DashboardData):
 
 def render_model_performance(data: DashboardData):
     st.header("Model Performance")
+        # Confusion matrix for final model on the test set
+    test_df = data.df[data.df["split"] == "test"].copy()
+
+    X_test = data.scaler.transform(test_df[FEATURE_COLS].values)
+    y_test = test_df["elevated_risk"].astype(int).values
+
+    test_prob = data.model.predict_proba(X_test)[:, 1]
+    test_pred = (test_prob >= float(data.threshold)).astype(int)
+
+    tn, fp, fn, tp = confusion_matrix(y_test, test_pred).ravel()
+
+    st.subheader(f"Final results at threshold {data.threshold:.2f}")
+
+    c1, c2, c3, c4 = st.columns(4)
+
+    c1.metric("Risky releases caught", tp)
+    c2.metric("Risky releases missed", fn)
+    c3.metric("Safe releases identified", tn)
+    c4.metric("False alarms", fp)
+
+    st.subheader("Confusion matrix")
+
+    cm_table = pd.DataFrame(
+        [
+            [tn, fp],
+            [fn, tp],
+        ],
+        index=["Actually safe", "Actually elevated risk"],
+        columns=["Predicted safe", "Predicted elevated risk"],
+    )
+
+    st.dataframe(cm_table, use_container_width=True)
 
     if data.comparison_summary is not None:
         st.subheader("ROC-AUC by model and split")
@@ -202,6 +266,59 @@ def render_model_performance(data: DashboardData):
         st.subheader("Global risk drivers")
         st.image(str(global_drivers_path))
 
+def render_data_insights(data: DashboardData):
+    st.header("Data & Repository Insights")
+    st.caption(
+        "How release risk changes over time and how patterns differ across repositories."
+    )
+
+    split_rates = (
+        data.df.groupby("split")["elevated_risk"]
+        .mean()
+        .reindex(["train", "validation", "test"])
+    )
+
+    st.subheader("Risk distribution across time periods")
+
+    c1, c2, c3 = st.columns(3)
+
+    c1.metric("Training risk rate", f"{split_rates['train']:.1%}")
+    c2.metric("Validation risk rate", f"{split_rates['validation']:.1%}")
+    c3.metric("Test risk rate", f"{split_rates['test']:.1%}")
+    st.warning(
+        "The share of elevated-risk releases changes quite a lot across the three time periods. "
+        "This shows that the data distribution has shifted over time, so the model should be "
+        "monitored and re-evaluated as new release data becomes available."
+    )
+
+    trend_path = ANALYSIS_DIR / "trend_over_time.png"
+
+    if trend_path.exists():
+        st.subheader("Risk and bug trends over time")
+        st.image(
+            str(trend_path),
+            caption="Elevated-risk rate and average post-release bug count over time",
+        )
+
+        sign_flip_path = ANALYSIS_DIR / "open_bugs_sign_flip.png"
+
+    if sign_flip_path.exists():
+        st.subheader("How risk patterns differ by repository")
+
+        st.write(
+            "For Apache Airflow and Kubernetes, elevated-risk releases tend to have "
+            "higher open-bug backlogs. For VS Code, the relationship goes in the opposite direction."
+        )
+
+        st.image(
+            str(sign_flip_path),
+            caption="Open bug backlog relationship by repository",
+        )
+
+        st.info(
+            "This shows that the same risk signal does not behave the same way across all repositories, "
+            "so repository context matters when interpreting the model."
+        )
 
 def render_about():
     st.header("About / Methodology")
@@ -234,7 +351,7 @@ def main():
     st.sidebar.title("Navigation")
     page = st.sidebar.radio(
         "Go to",
-        ["Overview", "Release Explorer", "Release Detail", "Model Performance", "About / Methodology"],
+        ["Overview", "Release Explorer", "Release Detail", "Model Performance", "Data & Repository Insights", "About / Methodology"],
     )
 
     if page == "Overview":
@@ -245,6 +362,8 @@ def main():
         render_release_detail(data)
     elif page == "Model Performance":
         render_model_performance(data)
+    elif page == "Data & Repository Insights":
+        render_data_insights(data)
     elif page == "About / Methodology":
         render_about()
 
