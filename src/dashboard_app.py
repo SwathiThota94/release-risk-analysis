@@ -111,16 +111,56 @@ def render_overview(data: DashboardData):
 
 def render_release_explorer(data: DashboardData):
     st.header("Release Explorer")
-    st.caption("Browse releases with model-predicted risk, filterable by repository, data split, and risk tier.")
+    st.caption("Browse releases with model-predicted risk, filterable by repository, data split, and risk tier, and prediction outcome.")
 
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
     repo_options = ["All"] + sorted(data.df["repository_name"].unique().tolist())
     repository = col1.selectbox("Repository", repo_options)
     split_options = ["All"] + sorted(data.df["split"].dropna().unique().tolist()) if "split" in data.df.columns else ["All"]
     split = col2.selectbox("Data split", split_options)
     risk_tier = col3.selectbox("Risk tier", ["All", "Low", "Medium", "High"])
 
+    prediction_outcome = col4.selectbox(
+        "Prediction outcome",
+        [
+            "All",
+            "True Positive",
+            "True Negative",
+            "False Positive",
+            "False Negative",
+        ],
+    )
+
     filtered = data.filter_releases(repository=repository, split=split, risk_tier=risk_tier)
+    filtered = filtered.copy()
+
+    filtered["predicted_class"] = (
+        filtered["predicted_probability"] >= float(data.threshold)
+    ).astype(int)
+
+    def get_prediction_outcome(row):
+        actual = int(row["elevated_risk"])
+        predicted = int(row["predicted_class"])
+
+        if actual == 1 and predicted == 1:
+            return "True Positive"
+        elif actual == 0 and predicted == 0:
+            return "True Negative"
+        elif actual == 0 and predicted == 1:
+            return "False Positive"
+        else:
+            return "False Negative"
+
+    filtered["prediction_outcome"] = filtered.apply(
+        get_prediction_outcome,
+        axis=1
+    )
+
+    if prediction_outcome != "All":
+        filtered = filtered[
+            filtered["prediction_outcome"] == prediction_outcome
+        ]
+
     st.write(f"**{len(filtered)} releases match these filters.**")
     st.dataframe(
         filtered.sort_values("predicted_probability", ascending=False),
@@ -176,10 +216,36 @@ def render_release_detail(data: DashboardData):
             st.subheader("Recommendations")
             r = rec_row.iloc[0]
             for i in range(1, 4):
+                driver_labels = {
+                "release_sequence": "Release history position",
+                "open_bugs_at_release_repo_z": "Open bug backlog vs repository norm",
+                "prior_releases_avg_bugs_repo_z": "Historical bug level vs repository norm",
+                "pct_merged": "PR merge rate",
+                "commit_count": "Commit volume",
+                "pr_count": "Pull request volume",
+                "first_time_contributor_count": "First-time contributors",
+                "first_time_contributor_share": "Share of first-time contributors",
+                "distinct_contributors": "Number of contributors",
+                "cycle_length_days": "Release cycle length",
+                "avg_time_to_merge_hours": "Average PR merge time",
+                "median_time_to_merge_hours": "Median PR merge time",
+                "top_contributor_share": "Top contributor share",
+            }
                 driver = r.get(f"top_driver_{i}", "")
                 rec = r.get(f"recommendation_{i}", "")
                 if isinstance(driver, str) and driver:
-                    st.markdown(f"**{driver}**")
+                    display_driver = driver
+
+                    for technical_name, friendly_name in driver_labels.items():
+                        if driver.startswith(technical_name):
+                            display_driver = driver.replace(
+                                technical_name,
+                                friendly_name,
+                                1
+                            )
+                            break
+
+                    st.markdown(f"**{display_driver}**")
                     st.markdown(f"> {rec}")
 
     st.subheader("Scenario analysis (what-if)")
@@ -252,6 +318,17 @@ def render_model_performance(data: DashboardData):
         ]
         st.dataframe(main_models, use_container_width=True)
 
+    with st.expander("Why was Logistic Regression selected?"):
+        st.write(
+            "Elastic Net had a slightly higher test ROC-AUC, but bootstrap testing showed "
+            "that the difference was not statistically meaningful. Logistic Regression also "
+            "had better probability calibration and is simpler to interpret, so it was selected "
+            "as the final model."
+        )
+
+        st.write("**Logistic Regression:** ROC-AUC 0.929, Brier score 0.213")
+        st.write("**Elastic Net:** ROC-AUC 0.933, Brier score 0.258")
+
     calibration_path = ANALYSIS_DIR / "calibration_curve.png"
     if calibration_path.exists():
         st.subheader("Calibration")
@@ -319,6 +396,40 @@ def render_data_insights(data: DashboardData):
             "This shows that the same risk signal does not behave the same way across all repositories, "
             "so repository context matters when interpreting the model."
         )
+
+    st.subheader("Research question summary")
+
+    rq1, rq2, rq3, rq4, rq5 = st.columns(5)
+
+    with rq1:
+        st.markdown("### RQ1")
+        st.markdown("**Commit activity**")
+        st.error("Not supported")
+        st.caption("Commit volume was not a strong independent pooled predictor of elevated risk.")
+
+    with rq2:
+        st.markdown("### RQ2")
+        st.markdown("**Pull-request activity**")
+        st.warning("Limited support")
+        st.caption("Some repository-specific signals were found, but no strong pooled relationship.")
+
+    with rq3:
+        st.markdown("### RQ3")
+        st.markdown("**Contributor turnover**")
+        st.warning("Weak support")
+        st.caption("Some signal was observed, but it did not remain significant after controlling for other factors.")
+
+    with rq4:
+        st.markdown("### RQ4")
+        st.markdown("**Release timing**")
+        st.success("Partially supported")
+        st.caption("Release timing showed a strong signal, but it is affected by temporal drift.")
+
+    with rq5:
+        st.markdown("### RQ5")
+        st.markdown("**Cross-repository behaviour**")
+        st.success("Strong evidence")
+        st.caption("Risk relationships differ meaningfully across repositories.") 
 
 def render_about():
     st.header("About / Methodology")
