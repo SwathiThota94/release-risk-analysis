@@ -62,7 +62,7 @@ FEATURE_COLS = [
     "had_commit_activity", "had_pr_activity", "has_prior_release_history", "has_prior_release",
     "repo_kubernetes/kubernetes", "repo_microsoft/vscode",
 ]
-CHOSEN_THRESHOLD = 0.32
+CHOSEN_THRESHOLD = 0.43
 TOP_N_DRIVERS = 3
 
 # --- Recommendation rules: feature -> (plain-language meaning, action when
@@ -210,12 +210,30 @@ def build_readiness_report(df: pd.DataFrame, shap_df: pd.DataFrame, model, scale
 
         driver_descriptions = []
         recommendations = []
-        for feat_col, shap_val in top_positive.items():
+
+        all_positive = contributions.sort_values(ascending=False)
+
+        for feat_col, shap_val in all_positive.items():
             feat = feat_col.replace("shap_", "")
+
+            # Skip repository indicators and negligible contributions
+            if feat.startswith("repo_") or shap_val <= 0.0005:
+                continue
+
             if feat in FEATURE_RULES and shap_val > 0:
                 desc, action = FEATURE_RULES[feat]
-                driver_descriptions.append(f"{feat} (contribution={shap_val:.3f}): {desc}")
+
+                # Skip structural/non-actionable recommendations
+                if action.startswith("N/A"):
+                    continue
+
+                driver_descriptions.append(
+                    f"{feat} (contribution={shap_val:.3f}): {desc}"
+                )
                 recommendations.append(action)
+
+                if len(recommendations) == TOP_N_DRIVERS:
+                    break
 
         rows.append({
             "release_id": release_id, "repository_name": repo,
@@ -308,8 +326,23 @@ def main():
 
     ANALYSIS_DIR.mkdir(parents=True, exist_ok=True)
 
-    print("=== Building release-readiness report (test set) ===")
-    report = build_readiness_report(df, shap_df, model, scaler, split_name="test")
+    
+    print("=== Building release-readiness report (all splits) ===")
+    reports = []
+
+    for split_name in ["train", "validation", "test"]:
+        split_report = build_readiness_report(
+            df,
+            shap_df,
+            model,
+            scaler,
+            split_name=split_name
+        )
+
+        split_report["split"] = split_name
+        reports.append(split_report)
+
+    report = pd.concat(reports, ignore_index=True)
     report.to_csv(ANALYSIS_DIR / "release_readiness_report.csv", index=False)
     print(f"Wrote {ANALYSIS_DIR / 'release_readiness_report.csv'} ({len(report)} releases)")
     print(f"\nRisk tier distribution:\n{report['risk_tier'].value_counts().to_string()}")
