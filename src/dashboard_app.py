@@ -151,10 +151,13 @@ def render_release_explorer(data: DashboardData):
         else:
             return "False Negative"
 
-    filtered["prediction_outcome"] = filtered.apply(
-        get_prediction_outcome,
-        axis=1
-    )
+    if filtered.empty:
+        filtered["prediction_outcome"] = pd.Series(dtype=str)
+    else:
+        filtered["prediction_outcome"] = filtered.apply(
+            get_prediction_outcome,
+            axis=1
+        )
 
     if prediction_outcome != "All":
         filtered = filtered[
